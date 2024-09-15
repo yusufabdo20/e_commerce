@@ -25,6 +25,42 @@ class AuthCubit extends Cubit<AuthStates> {
       user = UserLoginModel.fromJson(data["data"]);
       emit(LoginSuccess(user));
     } on DioException catch (e) {
+      var type = e.type;
+      switch (type) {
+        case DioExceptionType.connectionError:
+          emit(LoginError(
+              error:
+                  "Connection Error , try to connect with Internet (WIFI , DATA)"));
+          break;
+
+        case DioExceptionType.badCertificate:
+          emit(LoginError(
+              error:
+                  "Caused by an incorrect certificate as configured by ValidateCertificate"));
+          break;
+        case DioExceptionType.badResponse:
+          if (e.response?.statusCode == 401) {
+            emit(LoginError(error: "Invalid Credentials"));
+          } else if (e.response?.statusCode == 500) {
+            emit(LoginError(error: "Server Error"));
+          } else if (e.response?.statusCode == 404) {
+            emit(LoginError(error: "Not Found"));
+          } else {
+            emit(LoginError(error: "Bad Response"));
+          }
+          break;
+        case DioExceptionType.connectionTimeout:
+          emit(LoginError(error: "connectionTimeout"));
+          break;
+        case DioExceptionType.sendTimeout:
+          return 'send timeout';
+        case DioExceptionType.receiveTimeout:
+          return 'receive timeout';
+        case DioExceptionType.cancel:
+          return 'Cancel';
+        case DioExceptionType.unknown:
+          return 'Unkown';
+      }
       emit(
         LoginError(error: e.message ?? ""),
       );
