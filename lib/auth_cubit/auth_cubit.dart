@@ -25,7 +25,9 @@ class AuthCubit extends Cubit<AuthStates> {
       user = UserLoginModel.fromJson(data["data"]);
       emit(LoginSuccess(user));
     } on DioException catch (e) {
-      emit(LoginError(error: e.message ?? ""));
+      emit(
+        LoginError(error: e.message ?? ""),
+      );
     } catch (e) {
       emit(LoginError(error: e.toString()));
     }
